@@ -9,7 +9,8 @@
     "windows"
   ],
   "host_permissions": [
-    "https://audioproctor.com/*"
+    "https://audioproctor.com/*",
+    "https://app.audioproctor.com/*"
   ],
   "action": {
     "default_popup": "popup.html",
