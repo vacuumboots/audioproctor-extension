@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AudioProctor</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;500&display=swap');
+
+    :root {
+      --ink:    #1a1a2e;
+      --paper:  #f8f5ef;
+      --accent: #c0392b;
+      --muted:  #6b6560;
+      --border: 1px solid #1a1a2e;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      width: 300px;
+      padding: 1.5rem;
+    }
+
+    .wordmark {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 1.2rem;
+      display: block;
+      margin-bottom: 1.25rem;
+    }
+
+    .wordmark .accent { color: var(--accent); }
+
+    .label {
+      font-size: 0.65rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 500;
+      display: block;
+      margin-bottom: 0.4rem;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      border: var(--border);
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'Courier New', monospace;
+      font-size: 1.2rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.6rem 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    input[type="text"]:focus {
+      outline: 2px solid var(--ink);
+      outline-offset: 1px;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.7rem 1rem;
+      background: var(--ink);
+      color: var(--paper);
+      border: var(--border);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      font-size: 0.875rem;
+      cursor: pointer;
+      margin-bottom: 0.75rem;
+    }
+
+    button:hover { opacity: 0.85; }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .error-msg {
+      font-size: 0.8rem;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      background: #fdf0ee;
+      padding: 0.5rem 0.6rem;
+      display: none;
+    }
+
+    .hint {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.5rem;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <span class="wordmark">Audio<span class="accent">Proctor</span></span>
+
+  <span class="label">Assessment Code</span>
+  <input
+    type="text"
+    id="code-input"
+    placeholder="ABC-123"
+    maxlength="7"
+    autocomplete="off"
+    spellcheck="false"
+  >
+
+  <button id="btn-begin">Begin Assessment</button>
+
+  <div id="error-msg" class="error-msg"></div>
+
+  <span class="hint">Enter the code your teacher gave you.</span>
+
+  <script src="popup.js"></script>
+</body>
+</html>
