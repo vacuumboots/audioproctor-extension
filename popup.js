@@ -8,10 +8,13 @@ const codeInput  = document.getElementById('code-input');
 const btnBegin   = document.getElementById('btn-begin');
 const errorEl    = document.getElementById('error-msg');
 
-// Auto-format input: uppercase, insert hyphen after 3 chars
+// Auto-format input: uppercase; insert hyphen after 3 chars only for standard format
+// (first 3 chars all letters — ABC-123). Short (AB12) and custom codes get no hyphen.
 codeInput.addEventListener('input', () => {
-  let raw = codeInput.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-  if (raw.length > 3) raw = raw.slice(0, 3) + '-' + raw.slice(3, 6);
+  let raw = codeInput.value.toUpperCase().replace(/[^A-Z0-9\s]/g, '').replace(/\s+/g, ' ');
+  const lettersOnly = raw.replace(/[^A-Z]/g, '');
+  const isStandard  = lettersOnly.length >= 3 && /^[A-Z]{3}/.test(raw) && raw.length > 3 && !raw.includes('-');
+  if (isStandard) raw = raw.slice(0, 3) + '-' + raw.replace('-', '').slice(3, 6);
   codeInput.value = raw;
 });
 
@@ -22,9 +25,9 @@ codeInput.addEventListener('keydown', e => {
 btnBegin.addEventListener('click', async () => {
   const code = codeInput.value.toUpperCase().trim();
 
-  // Client-side format check: must be XXX-999
-  if (!/^[A-Z]{3}-[0-9]{3}$/.test(code)) {
-    showError('Enter a valid code (e.g. ABC-123).');
+  // Accept: ABC-123 (standard), AB12 (short), or any 3–20 uppercase alphanumeric (custom)
+  if (!/^([A-Z]{3}-[0-9]{3}|[A-Z]{2}[0-9]{2}|[A-Z0-9]{3,20})$/.test(code)) {
+    showError('Enter a valid code (e.g. ABC-123 or AB12).');
     return;
   }
 
