@@ -8,13 +8,14 @@ const codeInput  = document.getElementById('code-input');
 const btnBegin   = document.getElementById('btn-begin');
 const errorEl    = document.getElementById('error-msg');
 
-// Auto-format input: uppercase; insert hyphen after 3 chars only for standard format
-// (first 3 chars all letters — ABC-123). Short (AB12) and custom codes get no hyphen.
+// Auto-format input: uppercase, strip non-alphanumeric.
+// Insert hyphen only for the standard format: exactly 3 letters followed by digits (ABC-123).
+// Short codes (AB12) and custom codes that start with more than 3 letters are left as-is.
 codeInput.addEventListener('input', () => {
-  let raw = codeInput.value.toUpperCase().replace(/[^A-Z0-9\s]/g, '').replace(/\s+/g, ' ');
-  const lettersOnly = raw.replace(/[^A-Z]/g, '');
-  const isStandard  = lettersOnly.length >= 3 && /^[A-Z]{3}/.test(raw) && raw.length > 3 && !raw.includes('-');
-  if (isStandard) raw = raw.slice(0, 3) + '-' + raw.replace('-', '').slice(3, 6);
+  let raw = codeInput.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (/^[A-Z]{3}[0-9]+$/.test(raw)) {
+    raw = raw.slice(0, 3) + '-' + raw.slice(3, 6);
+  }
   codeInput.value = raw;
 });
 
