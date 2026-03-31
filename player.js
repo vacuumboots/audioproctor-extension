@@ -2,7 +2,10 @@
 // Fullscreen lockdown audio player for the Chrome extension.
 // Reads session data from chrome.storage.session (written by popup.js).
 
+const API_BASE = 'https://audioproctor.com';
+
 let exitWordHash = null;
+let sessionCode  = null;   // access code — used as session identifier for event logging
 
 // ─── Lockdown ────────────────────────────────────────────────────
 
@@ -26,10 +29,12 @@ document.addEventListener('keydown', e => {
 chrome.storage.session.get('sessionData', ({ sessionData }) => {
   if (!sessionData || !sessionData.signedUrl) {
     showError('Session expired or not found. Please re-enter your code using the extension icon.');
+    logEvent('session_expired');
     return;
   }
 
   exitWordHash = sessionData.exitWordHash;
+  sessionCode  = sessionData.code;
 
   // Set filename in top bar and page title
   document.getElementById('top-filename').textContent = sessionData.filename;
@@ -61,10 +66,12 @@ chrome.storage.session.get('sessionData', ({ sessionData }) => {
 
   audio.addEventListener('ended', () => {
     document.getElementById('btn-play').innerHTML = '&#9654;';
+    logEvent('playback_completed', { position_seconds: Math.round(audio.duration || 0) });
   });
 
   audio.addEventListener('error', () => {
     showError('Audio failed to load. The session link may have expired. Ask your teacher to restart the assessment.');
+    logEvent('session_expired');
   });
 
   showPlayer();
@@ -78,15 +85,20 @@ function togglePlay() {
   if (audio.paused) {
     audio.play();
     btn.innerHTML = '&#9646;&#9646;';
+    // Distinguish first play (position ~0) from resume
+    const pos = Math.round(audio.currentTime || 0);
+    logEvent(pos < 2 ? 'playback_started' : 'playback_resumed', { position_seconds: pos });
   } else {
     audio.pause();
     btn.innerHTML = '&#9654;';
+    logEvent('playback_paused', { position_seconds: Math.round(audio.currentTime || 0) });
   }
 }
 
 function rewind() {
   const audio = document.getElementById('audio-el');
   audio.currentTime = Math.max(0, audio.currentTime - 10);
+  logEvent('replay_triggered', { position_seconds: Math.round(audio.currentTime || 0) });
 }
 
 function changeSpeed(rate) {
@@ -107,7 +119,8 @@ async function attemptExit() {
   const hash = await hashWord(word);
 
   if (hash === exitWordHash) {
-    // Correct — clear session and close the tab
+    logEvent('exit_word_used');
+    // Clear session and close the tab
     chrome.storage.session.remove('sessionData', () => {
       chrome.tabs.getCurrent(tab => chrome.tabs.remove(tab.id));
     });
@@ -124,6 +137,19 @@ async function hashWord(word) {
   return Array.from(new Uint8Array(buf))
     .map(b => b.toString(16).padStart(2, '0'))
     .join('');
+}
+
+// ─── Event Logging ───────────────────────────────────────────────
+// Fire-and-forget POST to /api/event. Failures are silently ignored —
+// analytics are best-effort and must never interrupt a student's session.
+
+function logEvent(eventType, metadata) {
+  if (!sessionCode) return;
+  fetch(`${API_BASE}/api/event`, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ code: sessionCode, eventType, metadata }),
+  }).catch(() => { /* swallow — analytics must not interrupt assessment */ });
 }
 
 // ─── State Helpers ───────────────────────────────────────────────
