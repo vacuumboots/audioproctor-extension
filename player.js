@@ -2,8 +2,10 @@
 // Fullscreen lockdown audio player for the Chrome extension.
 // Reads session data from chrome.storage.session (written by popup.js).
 
-const API_BASE = 'https://audioproctor.com';
-
+// API_BASE comes from sessionData.apiBase (set by popup.js).
+// To test locally: change API_BASE in popup.js to 'http://localhost:3000'.
+// No change needed in this file.
+let API_BASE     = 'https://audioproctor.com'; // fallback if sessionData missing
 let exitWordHash = null;
 let sessionCode  = null;   // access code — used as session identifier for event logging
 
@@ -35,6 +37,7 @@ chrome.storage.session.get('sessionData', ({ sessionData }) => {
 
   exitWordHash = sessionData.exitWordHash;
   sessionCode  = sessionData.code;
+  if (sessionData.apiBase) API_BASE = sessionData.apiBase;
 
   // Set filename in top bar and page title
   document.getElementById('top-filename').textContent = sessionData.filename;

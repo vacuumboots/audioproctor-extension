@@ -50,13 +50,16 @@ btnBegin.addEventListener('click', async () => {
     return;
   }
 
-  // Store session data so player.js can read it
+  // Store session data so player.js can read it.
+  // apiBase is included so player.js event logging uses the same origin
+  // as this popup — change API_BASE here once to test locally.
   await chrome.storage.session.set({
     sessionData: {
       signedUrl:    session.signedUrl,
       filename:     session.filename,
       exitWordHash: session.exitWordHash,
       code:         code,
+      apiBase:      API_BASE,
     },
   });
 
