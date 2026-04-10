@@ -10,8 +10,12 @@
   ],
   "host_permissions": [
     "https://audioproctor.com/*",
-    "https://app.audioproctor.com/*"
+    "https://app.audioproctor.com/*",
+    "*://*.supabase.co/*"
   ],
+  "background": {
+    "service_worker": "background.js"
+  },
   "action": {
     "default_popup": "popup.html",
     "default_icon": {

@@ -255,7 +255,7 @@
       <!-- Player -->
       <div id="state-player" class="player-card hidden">
 
-        <audio id="audio-el" preload="auto"></audio>
+        <iframe id="audio-frame" hidden></iframe>
 
         <!-- Playback controls -->
         <div class="audio-controls">
@@ -267,8 +267,8 @@
           </div>
           <div class="controls-row">
             <button class="play-btn" id="btn-play" title="Play / Pause">&#9654;</button>
-            <button class="ctrl-btn" onclick="rewind()">&#8592; 10s</button>
-            <select id="speed-select" onchange="changeSpeed(this.value)" title="Playback speed">
+            <button class="ctrl-btn" id="btn-rewind">&#8592; 10s</button>
+            <select id="speed-select" title="Playback speed">
               <option value="0.75">0.75×</option>
               <option value="1" selected>1×</option>
               <option value="1.25">1.25×</option>
@@ -290,7 +290,7 @@
               autocomplete="off"
               spellcheck="false"
             >
-            <button class="exit-btn" onclick="attemptExit()">Exit</button>
+            <button class="exit-btn" id="btn-exit">Exit</button>
           </div>
           <p id="exit-error" class="exit-error"></p>
         </div>

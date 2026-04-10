@@ -1,13 +1,21 @@
 // ─── Extension Player ─────────────────────────────────────────────
 // Fullscreen lockdown audio player for the Chrome extension.
 // Reads session data from chrome.storage.session (written by popup.js).
+//
+// Audio plays inside a hidden iframe (audio-bridge.html) served from the
+// web domain.  Chrome OS does not route audio output from extension pages
+// (chrome-extension:// origin), but iframes on a regular web origin can
+// produce sound.  All playback commands and events travel via postMessage.
 
 // API_BASE comes from sessionData.apiBase (set by popup.js).
 // To test locally: change API_BASE in popup.js to 'http://localhost:3000'.
 // No change needed in this file.
-let API_BASE     = 'https://audioproctor.com'; // fallback if sessionData missing
-let exitWordHash = null;
-let sessionCode  = null;   // access code — used as session identifier for event logging
+let API_BASE         = 'https://audioproctor.com'; // fallback if sessionData missing
+let exitWordHash     = null;
+let sessionCode      = null;   // access code — used as session identifier for event logging
+let allowClose       = false;  // set true by exit-word success so lockdown permits close
+let audioPaused      = true;   // tracks play/pause (bridge is in a separate frame)
+let audioCurrentTime = 0;      // updated by bridge timeupdate events
 
 // ─── Lockdown ────────────────────────────────────────────────────
 
@@ -16,15 +24,46 @@ chrome.windows.getCurrent(w => {
   chrome.windows.update(w.id, { state: 'fullscreen' });
 });
 
+// Re-enter fullscreen if the student exits it (via the Chrome X button, etc.)
+function enforceFullscreen() {
+  if (allowClose) return;
+  chrome.windows.getCurrent(w => {
+    if (w.state !== 'fullscreen') {
+      chrome.windows.update(w.id, { state: 'fullscreen' });
+    }
+  });
+}
+window.addEventListener('resize', enforceFullscreen);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') enforceFullscreen();
+});
+
+// Warn if the student tries to close the tab without the exit word
+window.addEventListener('beforeunload', e => {
+  if (!allowClose) { e.preventDefault(); e.returnValue = ''; }
+});
+
 // Prevent right-click context menu
 document.addEventListener('contextmenu', e => e.preventDefault());
 
-// Suppress F5 / Ctrl+R refresh and Ctrl+W close attempts
+// Block keyboard shortcuts that could escape the assessment.
+// Regular typing (exit word input) still works — only modifier combos and nav keys are blocked.
 document.addEventListener('keydown', e => {
-  if (e.key === 'F5' || (e.ctrlKey && e.key === 'r') || (e.ctrlKey && e.key === 'w')) {
-    e.preventDefault();
-  }
+  if (e.key === 'Tab')        { e.preventDefault(); return; } // focus escape to address bar
+  if (e.key === 'Escape')     { e.preventDefault(); enforceFullscreen(); return; }
+  if (/^F\d+$/.test(e.key))  { e.preventDefault(); return; } // F1-F12
+  if (e.ctrlKey || e.altKey || e.metaKey) { e.preventDefault(); return; }
 });
+
+// ─── Audio Bridge ────────────────────────────────────────────────
+// Sends commands to the hidden iframe that actually plays the audio.
+
+function sendBridge(msg) {
+  const frame = document.getElementById('audio-frame');
+  if (frame && frame.contentWindow) {
+    frame.contentWindow.postMessage(msg, '*');
+  }
+}
 
 // ─── Load Session ────────────────────────────────────────────────
 
@@ -43,69 +82,92 @@ chrome.storage.session.get('sessionData', ({ sessionData }) => {
   document.getElementById('top-filename').textContent = sessionData.filename;
   document.title = 'AudioProctor — ' + sessionData.filename;
 
-  // Load audio
-  const audio = document.getElementById('audio-el');
-  audio.src   = sessionData.signedUrl;
+  // Load audio via hidden iframe on the web domain
+  const frame = document.getElementById('audio-frame');
+  frame.src = API_BASE + '/audio-bridge.html';
+
+  frame.addEventListener('load', () => {
+    frame.contentWindow.postMessage(
+      { type: 'load', url: sessionData.signedUrl }, '*'
+    );
+  });
+
+  // Listen for events from the audio bridge
+  window.addEventListener('message', e => {
+    const msg = e.data;
+    if (!msg || !msg.type) return;
+
+    switch (msg.type) {
+      case 'loadedmetadata':
+        document.getElementById('progress-bar').max = msg.duration;
+        document.getElementById('time-total').textContent = formatTime(msg.duration);
+        showPlayer();
+        break;
+      case 'timeupdate':
+        audioCurrentTime = msg.currentTime;
+        document.getElementById('progress-bar').value = msg.currentTime;
+        document.getElementById('time-current').textContent = formatTime(msg.currentTime);
+        break;
+      case 'ended':
+        audioPaused = true;
+        document.getElementById('btn-play').innerHTML = '&#9654;';
+        logEvent('playback_completed');
+        break;
+      case 'error':
+        audioPaused = true;
+        document.getElementById('btn-play').innerHTML = '&#9654;';
+        showError('Audio failed: ' + msg.message + '. Ask your teacher to restart.');
+        logEvent('session_expired');
+        break;
+    }
+  });
 
   // Wire controls
   document.getElementById('btn-play').addEventListener('click', togglePlay);
+  document.getElementById('btn-rewind').addEventListener('click', rewind);
+  document.getElementById('speed-select').addEventListener('change', function () {
+    changeSpeed(this.value);
+  });
+  document.getElementById('btn-exit').addEventListener('click', attemptExit);
   document.getElementById('progress-bar').addEventListener('input', function () {
-    audio.currentTime = parseFloat(this.value);
+    sendBridge({ type: 'seek', time: parseFloat(this.value) });
   });
   document.getElementById('exit-input').addEventListener('keydown', e => {
     if (e.key === 'Enter') attemptExit();
   });
 
-  audio.addEventListener('loadedmetadata', () => {
-    document.getElementById('progress-bar').max = audio.duration;
-    document.getElementById('time-total').textContent = formatTime(audio.duration);
-  });
-
-  audio.addEventListener('timeupdate', () => {
-    const bar = document.getElementById('progress-bar');
-    bar.value = audio.currentTime;
-    document.getElementById('time-current').textContent = formatTime(audio.currentTime);
-  });
-
-  audio.addEventListener('ended', () => {
-    document.getElementById('btn-play').innerHTML = '&#9654;';
-    logEvent('playback_completed', { position_seconds: Math.round(audio.duration || 0) });
-  });
-
-  audio.addEventListener('error', () => {
-    showError('Audio failed to load. The session link may have expired. Ask your teacher to restart the assessment.');
-    logEvent('session_expired');
-  });
-
-  showPlayer();
+  // Timeout: if audio doesn't load within 15s, show error
+  setTimeout(() => {
+    if (document.getElementById('state-loading').classList.contains('hidden')) return;
+    showError('Audio is taking too long to load. Please try again.');
+  }, 15000);
 });
 
 // ─── Audio Controls ──────────────────────────────────────────────
 
 function togglePlay() {
-  const audio = document.getElementById('audio-el');
-  const btn   = document.getElementById('btn-play');
-  if (audio.paused) {
-    audio.play();
+  const btn = document.getElementById('btn-play');
+  if (audioPaused) {
+    sendBridge({ type: 'play' });
     btn.innerHTML = '&#9646;&#9646;';
-    // Distinguish first play (position ~0) from resume
-    const pos = Math.round(audio.currentTime || 0);
+    audioPaused = false;
+    const pos = Math.round(audioCurrentTime || 0);
     logEvent(pos < 2 ? 'playback_started' : 'playback_resumed', { position_seconds: pos });
   } else {
-    audio.pause();
+    sendBridge({ type: 'pause' });
     btn.innerHTML = '&#9654;';
-    logEvent('playback_paused', { position_seconds: Math.round(audio.currentTime || 0) });
+    audioPaused = true;
+    logEvent('playback_paused', { position_seconds: Math.round(audioCurrentTime || 0) });
   }
 }
 
 function rewind() {
-  const audio = document.getElementById('audio-el');
-  audio.currentTime = Math.max(0, audio.currentTime - 10);
-  logEvent('replay_triggered', { position_seconds: Math.round(audio.currentTime || 0) });
+  sendBridge({ type: 'rewind', seconds: 10 });
+  logEvent('replay_triggered', { position_seconds: Math.round(audioCurrentTime || 0) });
 }
 
 function changeSpeed(rate) {
-  document.getElementById('audio-el').playbackRate = parseFloat(rate);
+  sendBridge({ type: 'speed', rate: parseFloat(rate) });
 }
 
 // ─── Exit Word Verification ──────────────────────────────────────
@@ -123,9 +185,10 @@ async function attemptExit() {
 
   if (hash === exitWordHash) {
     logEvent('exit_word_used');
-    // Clear session and close the tab
+    allowClose = true;
+    chrome.runtime.sendMessage({ type: 'player_closing' });
     chrome.storage.session.remove('sessionData', () => {
-      chrome.tabs.getCurrent(tab => chrome.tabs.remove(tab.id));
+      chrome.windows.getCurrent(w => chrome.windows.remove(w.id));
     });
   } else {
     showExitError('Incorrect exit word. Ask your teacher.');

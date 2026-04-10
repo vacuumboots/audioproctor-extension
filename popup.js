@@ -63,8 +63,13 @@ btnBegin.addEventListener('click', async () => {
     },
   });
 
-  // Open the player in a new tab, then close the popup
-  await chrome.tabs.create({ url: chrome.runtime.getURL('player.html') });
+  // Open the player in a chromeless popup window (no tab strip, no address bar)
+  const win = await chrome.windows.create({
+    url:   chrome.runtime.getURL('player.html'),
+    type:  'popup',
+    state: 'fullscreen',
+  });
+  chrome.runtime.sendMessage({ type: 'player_opened', windowId: win.id });
   window.close();
 });
 
