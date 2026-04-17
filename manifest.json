@@ -6,7 +6,8 @@
   "permissions": [
     "storage",
     "tabs",
-    "windows"
+    "windows",
+    "offscreen"
   ],
   "host_permissions": [
     "https://audioproctor.com/*",
