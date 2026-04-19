@@ -63,6 +63,10 @@ btnBegin.addEventListener('click', async () => {
     },
   });
 
+  // Ensure the offscreen audio document is ready before opening the player window,
+  // so player.js's first 'load' message is guaranteed to be received.
+  await chrome.runtime.sendMessage({ type: 'prepare_session' });
+
   // Open the player in a chromeless popup window (no tab strip, no address bar)
   const win = await chrome.windows.create({
     url:   chrome.runtime.getURL('player.html'),

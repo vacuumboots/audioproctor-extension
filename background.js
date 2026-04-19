@@ -23,12 +23,17 @@ async function ensureOffscreen() {
   }
 }
 
-chrome.runtime.onMessage.addListener((msg) => {
+chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+  if (msg.type === 'prepare_session') {
+    // Popup calls this and awaits the response before creating the player window,
+    // guaranteeing the offscreen document exists when player.js sends 'load'.
+    ensureOffscreen().catch(() => {}).then(() => sendResponse());
+    return true; // keep channel open for async response
+  }
   if (msg.type === 'player_opened') {
     playerWindowId   = msg.windowId;
     playerAllowClose = false;
     chrome.storage.session.set({ playerWindowId: msg.windowId });
-    ensureOffscreen();
   }
   if (msg.type === 'player_closing') {
     playerAllowClose = true;
