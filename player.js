@@ -117,7 +117,7 @@ chrome.storage.session.get('sessionData', ({ sessionData }) => {
         audioPaused = true;
         document.getElementById('btn-play').innerHTML = '&#9654;';
         showError('Audio failed: ' + msg.message + '. Ask your teacher to restart.');
-        logEvent('session_expired');
+        logEvent('audio_error', { message: msg.message });
         break;
     }
   });
