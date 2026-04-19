@@ -12,6 +12,8 @@ let sessionCode      = null;
 let allowClose       = false;
 let audioPaused      = true;
 let audioCurrentTime = 0;
+let signedUrl        = null;
+let loadTimeout      = null;
 
 // ─── Lockdown ────────────────────────────────────────────────────
 
@@ -68,7 +70,9 @@ chrome.storage.session.get('sessionData', ({ sessionData }) => {
   document.title = 'AudioProctor — ' + sessionData.filename;
 
   // Load audio in the offscreen document
-  sendOffscreen({ action: 'load', url: sessionData.signedUrl });
+  signedUrl = sessionData.signedUrl;
+  sendOffscreen({ action: 'load', url: signedUrl });
+  startLoadTimeout();
 
   // Listen for events from the offscreen document
   chrome.runtime.onMessage.addListener((msg) => {
@@ -105,18 +109,20 @@ chrome.storage.session.get('sessionData', ({ sessionData }) => {
   document.getElementById('speed-select').addEventListener('change', function () {
     changeSpeed(this.value);
   });
-  document.getElementById('btn-exit').addEventListener('click', attemptExit);
+  document.getElementById('btn-exit').addEventListener('click', () => attemptExit('exit-input', 'exit-error'));
   document.getElementById('progress-bar').addEventListener('input', function () {
     sendOffscreen({ action: 'seek', time: parseFloat(this.value) });
   });
   document.getElementById('exit-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter') attemptExit();
+    if (e.key === 'Enter') attemptExit('exit-input', 'exit-error');
   });
 
-  setTimeout(() => {
-    if (document.getElementById('state-loading').classList.contains('hidden')) return;
-    showError('Audio is taking too long to load. Please try again.');
-  }, 15000);
+  // Error-state retry and exit
+  document.getElementById('btn-retry').addEventListener('click', retryLoad);
+  document.getElementById('btn-exit-error').addEventListener('click', () => attemptExit('exit-input-error', 'exit-error-error'));
+  document.getElementById('exit-input-error').addEventListener('keydown', e => {
+    if (e.key === 'Enter') attemptExit('exit-input-error', 'exit-error-error');
+  });
 });
 
 // ─── Audio Controls ──────────────────────────────────────────────
@@ -146,14 +152,31 @@ function changeSpeed(rate) {
   sendOffscreen({ action: 'speed', rate: parseFloat(rate) });
 }
 
+// ─── Load Timeout + Retry ────────────────────────────────────────
+
+function startLoadTimeout() {
+  clearTimeout(loadTimeout);
+  loadTimeout = setTimeout(() => {
+    if (document.getElementById('state-loading').classList.contains('hidden')) return;
+    showError('Audio is taking too long to load. Please try again.');
+  }, 60000);
+}
+
+function retryLoad() {
+  document.getElementById('state-error').classList.add('hidden');
+  document.getElementById('state-loading').classList.remove('hidden');
+  sendOffscreen({ action: 'load', url: signedUrl });
+  startLoadTimeout();
+}
+
 // ─── Exit Word Verification ──────────────────────────────────────
 
-async function attemptExit() {
-  const input = document.getElementById('exit-input');
+async function attemptExit(inputId, errorId) {
+  const input = document.getElementById(inputId);
   const word  = input.value.toLowerCase().trim();
 
   if (!word) {
-    showExitError('Please type the exit word.');
+    showExitError(errorId, 'Please type the exit word.');
     return;
   }
 
@@ -167,7 +190,7 @@ async function attemptExit() {
       chrome.windows.getCurrent(w => chrome.windows.remove(w.id));
     });
   } else {
-    showExitError('Incorrect exit word. Ask your teacher.');
+    showExitError(errorId, 'Incorrect exit word. Ask your teacher.');
     input.value = '';
     input.focus();
   }
@@ -205,8 +228,8 @@ function showError(msg) {
   document.getElementById('state-error').classList.remove('hidden');
 }
 
-function showExitError(msg) {
-  const el = document.getElementById('exit-error');
+function showExitError(errorId, msg) {
+  const el = document.getElementById(errorId);
   el.textContent   = msg;
   el.style.display = 'block';
 }

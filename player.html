@@ -250,6 +250,23 @@
       <!-- Error -->
       <div id="state-error" class="hidden">
         <p class="state-label error" id="error-msg">Something went wrong.</p>
+        <button class="ctrl-btn" id="btn-retry" style="margin: 1.5rem auto 0; display: block;">Try Again</button>
+        <div class="exit-section" style="margin-top: 2rem; text-align: left; max-width: 400px; margin-left: auto; margin-right: auto;">
+          <span class="exit-label">Exit Assessment</span>
+          <p class="exit-hint">Ask your teacher for the exit word, then type it below.</p>
+          <div class="exit-row">
+            <input
+              type="text"
+              id="exit-input-error"
+              class="exit-input"
+              placeholder="Exit word"
+              autocomplete="off"
+              spellcheck="false"
+            >
+            <button class="exit-btn" id="btn-exit-error">Exit</button>
+          </div>
+          <p id="exit-error-error" class="exit-error"></p>
+        </div>
       </div>
 
       <!-- Player -->
