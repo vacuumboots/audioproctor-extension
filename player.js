@@ -128,20 +128,19 @@ chrome.storage.session.get('sessionData', ({ sessionData }) => {
   document.getElementById('speed-select').addEventListener('change', function () {
     changeSpeed(this.value);
   });
-  document.getElementById('btn-exit').addEventListener('click', () => attemptExit('exit-input', 'exit-error'));
   document.getElementById('progress-bar').addEventListener('input', function () {
     sendOffscreen({ action: 'seek', time: parseFloat(this.value) });
   });
-  document.getElementById('exit-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter') attemptExit('exit-input', 'exit-error');
-  });
 
-  // Error-state retry and exit
+  // Error-state retry
   document.getElementById('btn-retry').addEventListener('click', retryLoad);
-  document.getElementById('btn-exit-error').addEventListener('click', () => attemptExit('exit-input-error', 'exit-error-error'));
-  document.getElementById('exit-input-error').addEventListener('keydown', e => {
-    if (e.key === 'Enter') attemptExit('exit-input-error', 'exit-error-error');
-  });
+});
+
+// ─── Exit Section (always visible, wired outside session callback) ───
+
+document.getElementById('btn-exit').addEventListener('click', () => attemptExit('exit-input', 'exit-error'));
+document.getElementById('exit-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') attemptExit('exit-input', 'exit-error');
 });
 
 // ─── Audio Controls ──────────────────────────────────────────────
@@ -208,7 +207,7 @@ async function attemptExit(inputId, errorId) {
 }
 
 async function hashWord(word) {
-  const data = new TextEncoder().encode(word.toLowerCase().trim());
+  const data = new TextEncoder().encode(word);
   const buf  = await crypto.subtle.digest('SHA-256', data);
   return Array.from(new Uint8Array(buf))
     .map(b => b.toString(16).padStart(2, '0'))
