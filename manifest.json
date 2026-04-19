@@ -12,7 +12,7 @@
   "host_permissions": [
     "https://audioproctor.com/*",
     "https://app.audioproctor.com/*",
-    "*://*.supabase.co/*"
+    "https://*.supabase.co/*"
   ],
   "background": {
     "service_worker": "background.js"

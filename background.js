@@ -4,6 +4,8 @@
 
 let playerWindowId  = null;
 let playerAllowClose = false;
+let reopenAttempts   = 0;
+const MAX_REOPEN_ATTEMPTS = 5;
 
 chrome.storage.session.get('playerWindowId', (data) => {
   playerWindowId = data.playerWindowId || null;
@@ -33,6 +35,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (msg.type === 'player_opened') {
     playerWindowId   = msg.windowId;
     playerAllowClose = false;
+    reopenAttempts   = 0;
     chrome.storage.session.set({ playerWindowId: msg.windowId });
   }
   if (msg.type === 'player_closing') {
@@ -55,6 +58,7 @@ chrome.windows.onRemoved.addListener(windowId => {
     // Legitimate exit via exit word — clean up everything
     playerWindowId   = null;
     playerAllowClose = false;
+    reopenAttempts   = 0;
     chrome.storage.session.remove('playerWindowId');
     chrome.offscreen.closeDocument().catch(() => {});
   } else {
@@ -62,6 +66,17 @@ chrome.windows.onRemoved.addListener(windowId => {
     // Null out immediately so onFocusChanged doesn't try to update the removed window
     // while we're creating the replacement.
     playerWindowId = null;
+    reopenAttempts++;
+
+    if (reopenAttempts > MAX_REOPEN_ATTEMPTS) {
+      // Too many reopen attempts — give up to avoid infinite loop
+      console.warn('AudioProctor: max reopen attempts reached, stopping.');
+      reopenAttempts = 0;
+      chrome.storage.session.remove('playerWindowId');
+      chrome.offscreen.closeDocument().catch(() => {});
+      return;
+    }
+
     chrome.storage.session.get('sessionData', async ({ sessionData }) => {
       if (sessionData && sessionData.signedUrl) {
         await ensureOffscreen(); // must exist before player.js sends 'load'

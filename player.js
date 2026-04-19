@@ -7,6 +7,8 @@
 // and events arrive via chrome.runtime.onMessage with {target:'player'}.
 
 let API_BASE         = 'https://audioproctor.com';
+const ALLOWED_API_BASES = ['https://audioproctor.com', 'https://app.audioproctor.com'];
+const ALLOWED_URL_PATTERN = /^https:\/\/[a-z0-9-]+\.supabase\.co\//;
 let exitWordHash     = null;
 let sessionCode      = null;
 let allowClose       = false;
@@ -63,13 +65,20 @@ chrome.storage.session.get('sessionData', ({ sessionData }) => {
 
   exitWordHash = sessionData.exitWordHash;
   sessionCode  = sessionData.code;
-  if (sessionData.apiBase) API_BASE = sessionData.apiBase;
+  if (sessionData.apiBase && ALLOWED_API_BASES.includes(sessionData.apiBase)) {
+    API_BASE = sessionData.apiBase;
+  }
 
   document.getElementById('top-filename').textContent = sessionData.filename;
   document.title = 'AudioProctor — ' + sessionData.filename;
 
-  // Load audio in the offscreen document
+  // Load audio in the offscreen document — validate URL is from Supabase
   signedUrl = sessionData.signedUrl;
+  if (!ALLOWED_URL_PATTERN.test(signedUrl)) {
+    showError('Invalid audio source. Please re-enter your code.');
+    logEvent('audio_error', { message: 'invalid signed URL origin' });
+    return;
+  }
   sendOffscreen({ action: 'load', url: signedUrl });
   startLoadTimeout();
 
