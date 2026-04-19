@@ -13,7 +13,7 @@ chrome.runtime.onMessage.addListener((msg) => {
       audio.load();
       break;
     case 'play':
-      audio.play().catch(() => {});
+      audio.play().catch(err => toPlayer({ type: 'play_error', message: err.message || 'Playback blocked' }));
       break;
     case 'pause':
       audio.pause();
@@ -42,3 +42,7 @@ audio.addEventListener('ended', () =>
   toPlayer({ type: 'ended' }));
 audio.addEventListener('error', () =>
   toPlayer({ type: 'error', message: audio.error?.message || 'unknown error' }));
+audio.addEventListener('playing', () =>
+  toPlayer({ type: 'playing' }));
+audio.addEventListener('pause', () =>
+  toPlayer({ type: 'pause' }));

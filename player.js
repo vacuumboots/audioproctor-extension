@@ -94,6 +94,25 @@ chrome.storage.session.get('sessionData', ({ sessionData }) => {
         document.getElementById('btn-play').innerHTML = '&#9654;';
         logEvent('playback_completed');
         break;
+      case 'playing':
+        audioPaused = false;
+        document.getElementById('btn-play').innerHTML = '&#9646;&#9646;';
+        { const pos = Math.round(audioCurrentTime || 0);
+          logEvent(pos < 2 ? 'playback_started' : 'playback_resumed', { position_seconds: pos }); }
+        break;
+      case 'pause':
+        // The 'pause' event also fires after 'ended'; only log if we weren't already paused.
+        if (!audioPaused) {
+          audioPaused = true;
+          document.getElementById('btn-play').innerHTML = '&#9654;';
+          logEvent('playback_paused', { position_seconds: Math.round(audioCurrentTime || 0) });
+        }
+        break;
+      case 'play_error':
+        audioPaused = true;
+        document.getElementById('btn-play').innerHTML = '&#9654;';
+        showError('Playback blocked: ' + msg.message + '. Try clicking Play again.');
+        break;
       case 'error':
         audioPaused = true;
         document.getElementById('btn-play').innerHTML = '&#9654;';
@@ -128,18 +147,10 @@ chrome.storage.session.get('sessionData', ({ sessionData }) => {
 // ─── Audio Controls ──────────────────────────────────────────────
 
 function togglePlay() {
-  const btn = document.getElementById('btn-play');
   if (audioPaused) {
     sendOffscreen({ action: 'play' });
-    btn.innerHTML = '&#9646;&#9646;';
-    audioPaused = false;
-    const pos = Math.round(audioCurrentTime || 0);
-    logEvent(pos < 2 ? 'playback_started' : 'playback_resumed', { position_seconds: pos });
   } else {
     sendOffscreen({ action: 'pause' });
-    btn.innerHTML = '&#9654;';
-    audioPaused = true;
-    logEvent('playback_paused', { position_seconds: Math.round(audioCurrentTime || 0) });
   }
 }
 
