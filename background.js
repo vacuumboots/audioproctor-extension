@@ -54,8 +54,9 @@ chrome.windows.onRemoved.addListener(windowId => {
     chrome.offscreen.closeDocument().catch(() => {});
   } else {
     // Unauthorized close (e.g. Chrome OS system close button) — reopen
-    chrome.storage.session.get('sessionData', ({ sessionData }) => {
+    chrome.storage.session.get('sessionData', async ({ sessionData }) => {
       if (sessionData && sessionData.signedUrl) {
+        await ensureOffscreen(); // must exist before player.js sends 'load'
         chrome.windows.create(
           { url: chrome.runtime.getURL('player.html'), type: 'popup', state: 'fullscreen' },
           (win) => {
