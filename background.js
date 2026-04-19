@@ -2,7 +2,8 @@
 // Tracks the player window, enforces fullscreen focus, and manages
 // the offscreen audio document.
 
-let playerWindowId = null;
+let playerWindowId  = null;
+let playerAllowClose = false;
 
 chrome.storage.session.get('playerWindowId', (data) => {
   playerWindowId = data.playerWindowId || null;
@@ -24,14 +25,14 @@ async function ensureOffscreen() {
 
 chrome.runtime.onMessage.addListener((msg) => {
   if (msg.type === 'player_opened') {
-    playerWindowId = msg.windowId;
+    playerWindowId   = msg.windowId;
+    playerAllowClose = false;
     chrome.storage.session.set({ playerWindowId: msg.windowId });
     ensureOffscreen();
   }
   if (msg.type === 'player_closing') {
-    playerWindowId = null;
-    chrome.storage.session.remove('playerWindowId');
-    chrome.offscreen.closeDocument().catch(() => {});
+    playerAllowClose = true;
+    // onRemoved handles the actual cleanup
   }
 });
 
@@ -43,9 +44,30 @@ chrome.windows.onFocusChanged.addListener(windowId => {
 });
 
 chrome.windows.onRemoved.addListener(windowId => {
-  if (windowId === playerWindowId) {
-    playerWindowId = null;
+  if (windowId !== playerWindowId) return;
+
+  if (playerAllowClose) {
+    // Legitimate exit via exit word — clean up everything
+    playerWindowId   = null;
+    playerAllowClose = false;
     chrome.storage.session.remove('playerWindowId');
     chrome.offscreen.closeDocument().catch(() => {});
+  } else {
+    // Unauthorized close (e.g. Chrome OS system close button) — reopen
+    chrome.storage.session.get('sessionData', ({ sessionData }) => {
+      if (sessionData && sessionData.signedUrl) {
+        chrome.windows.create(
+          { url: chrome.runtime.getURL('player.html'), type: 'popup', state: 'fullscreen' },
+          (win) => {
+            playerWindowId = win.id;
+            chrome.storage.session.set({ playerWindowId: win.id });
+          }
+        );
+      } else {
+        playerWindowId = null;
+        chrome.storage.session.remove('playerWindowId');
+        chrome.offscreen.closeDocument().catch(() => {});
+      }
+    });
   }
 });
