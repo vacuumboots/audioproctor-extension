@@ -41,7 +41,6 @@ window.addEventListener('beforeunload', e => {
 document.addEventListener('contextmenu', e => e.preventDefault());
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'Tab')        { e.preventDefault(); return; }
   if (e.key === 'Escape')     { e.preventDefault(); enforceFullscreen(); return; }
   if (/^F\d+$/.test(e.key))  { e.preventDefault(); return; }
   if (e.ctrlKey || e.altKey || e.metaKey) { e.preventDefault(); return; }
