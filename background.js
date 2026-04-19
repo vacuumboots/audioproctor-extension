@@ -59,6 +59,9 @@ chrome.windows.onRemoved.addListener(windowId => {
     chrome.offscreen.closeDocument().catch(() => {});
   } else {
     // Unauthorized close (e.g. Chrome OS system close button) — reopen
+    // Null out immediately so onFocusChanged doesn't try to update the removed window
+    // while we're creating the replacement.
+    playerWindowId = null;
     chrome.storage.session.get('sessionData', async ({ sessionData }) => {
       if (sessionData && sessionData.signedUrl) {
         await ensureOffscreen(); // must exist before player.js sends 'load'
@@ -70,7 +73,6 @@ chrome.windows.onRemoved.addListener(windowId => {
           }
         );
       } else {
-        playerWindowId = null;
         chrome.storage.session.remove('playerWindowId');
         chrome.offscreen.closeDocument().catch(() => {});
       }
