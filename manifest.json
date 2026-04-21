@@ -5,7 +5,6 @@
   "description": "Secure audio assessment player for managed Chromebooks",
   "permissions": [
     "storage",
-    "tabs",
     "windows",
     "offscreen"
   ],
