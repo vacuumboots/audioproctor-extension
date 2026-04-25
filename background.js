@@ -47,7 +47,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
 chrome.windows.onFocusChanged.addListener(windowId => {
   if (playerWindowId === null) return;
   if (windowId !== playerWindowId) {
-    chrome.windows.update(playerWindowId, { focused: true, state: 'fullscreen' });
+    chrome.windows.update(playerWindowId, { focused: true, state: 'fullscreen' }).catch(() => {});
   }
 });
 

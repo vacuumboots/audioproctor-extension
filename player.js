@@ -177,7 +177,7 @@ function startLoadTimeout() {
   loadTimeout = setTimeout(() => {
     if (document.getElementById('state-loading').classList.contains('hidden')) return;
     showError('Audio is taking too long to load. Please try again.');
-  }, 60000);
+  }, 120000);
 }
 
 function retryLoad() {
