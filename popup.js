@@ -37,7 +37,9 @@ btnBegin.addEventListener('click', async () => {
 
   let session;
   try {
-    const res = await fetch(`${API_BASE}/api/session?code=${encodeURIComponent(code)}`);
+    const res = await fetch(`${API_BASE}/api/session?code=${encodeURIComponent(code)}`, {
+      referrerPolicy: 'no-referrer',
+    });
     session   = await res.json();
 
     if (res.status === 404) { showError('Code not found — check with your teacher.');  setLoading(false); return; }
