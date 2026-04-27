@@ -27,8 +27,11 @@ Scope note:
 - No permanent student data storage inside the extension
 - Session data is stored in `chrome.storage.session` (ephemeral)
 - Audio URL must match expected Supabase host pattern
-- API base is allowlisted
+- API base is allowlisted (`https://audioproctor.com` and `https://app.audioproctor.com`)
 - Exit word is verified by SHA-256 hash comparison (plaintext exit word is not stored in the extension)
+- Content Security Policy is declared in `manifest.json`, restricting scripts to extension-origin only and limiting network connections to the AudioProctor API and Supabase storage
+- No external fonts or resources are loaded; all assets are bundled within the extension to prevent data leakage to third parties
+- All `fetch()` calls use `referrerPolicy: 'no-referrer'` to prevent the extension URL from appearing in server access logs
 
 ## Permissions used
 

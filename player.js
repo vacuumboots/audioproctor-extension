@@ -229,6 +229,7 @@ function logEvent(eventType, metadata) {
   fetch(`${API_BASE}/api/event`, {
     method:  'POST',
     headers: { 'Content-Type': 'application/json' },
+    referrerPolicy: 'no-referrer',
     body:    JSON.stringify({ code: sessionCode, eventType, metadata }),
   }).catch(() => {});
 }
