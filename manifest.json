@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "AudioProctor",
-  "version": "1.0.0",
-  "version_name": "v1.0.0+git.72d438e",
+  "version": "1.0.1",
+  "version_name": "v1.0.1",
   "description": "Secure audio assessment player for managed Chromebooks",
   "permissions": [
     "storage",
@@ -11,6 +11,7 @@
   ],
   "host_permissions": [
     "https://audioproctor.com/*",
+    "https://www.audioproctor.com/*",
     "https://app.audioproctor.com/*",
     "https://*.supabase.co/*"
   ],
@@ -31,6 +32,6 @@
     "128": "icons/icon128.png"
   },
   "content_security_policy": {
-    "extension_pages": "default-src 'self'; connect-src https://audioproctor.com https://app.audioproctor.com https://*.supabase.co; style-src 'self' 'unsafe-inline'; media-src https://*.supabase.co;"
+    "extension_pages": "default-src 'self'; connect-src https://audioproctor.com https://www.audioproctor.com https://app.audioproctor.com https://*.supabase.co; style-src 'self' 'unsafe-inline'; media-src https://*.supabase.co;"
   }
 }
