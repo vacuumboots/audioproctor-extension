@@ -29,5 +29,8 @@
     "16":  "icons/icon16.png",
     "48":  "icons/icon48.png",
     "128": "icons/icon128.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "default-src 'self'; connect-src https://audioproctor.com https://app.audioproctor.com https://*.supabase.co; style-src 'self' 'unsafe-inline'; media-src https://*.supabase.co;"
   }
 }

@@ -230,6 +230,7 @@ function logEvent(eventType, metadata) {
     method:  'POST',
     headers: { 'Content-Type': 'application/json' },
     body:    JSON.stringify({ code: sessionCode, eventType, metadata }),
+    referrerPolicy: 'no-referrer',
   }).catch(() => {});
 }
 
