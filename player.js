@@ -76,9 +76,9 @@ chrome.storage.session.get('sessionData', ({ sessionData }) => {
   // ─── Branch: audio vs text ──────────────────────────────────────
 
   if (sessionData.assessmentType === 'text' && sessionData.textContent) {
-    // Text assessment — render text reader, skip audio infrastructure
-    const textEl = document.getElementById('text-content');
-    textEl.textContent = sessionData.textContent;  // safe: textContent, not innerHTML
+    // Text assessment — render paragraphs, wire read-aloud, skip audio infrastructure
+    renderTextParagraphs(sessionData.textContent);
+    initReadAloud();
     document.getElementById('state-loading').classList.add('hidden');
     document.getElementById('state-text').classList.remove('hidden');
     logEvent('text_viewed');
@@ -162,6 +162,134 @@ document.getElementById('btn-exit').addEventListener('click', () => attemptExit(
 document.getElementById('exit-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') attemptExit('exit-input', 'exit-error');
 });
+
+// ─── Text Reader ─────────────────────────────────────────────────
+
+let ttsParagraphs  = [];
+let ttsCurrentIdx  = -1;
+let ttsPlaying     = false;
+let ttsPaused      = false;
+let ttsRate        = 1.0;
+
+function renderTextParagraphs(rawText) {
+  const container = document.getElementById('text-paragraphs');
+  // Split on double newlines, collapse whitespace, filter empty
+  const chunks = rawText
+    .split(/\n{2,}/)
+    .map(s => s.trim())
+    .filter(s => s.length > 0);
+
+  container.innerHTML = '';
+  ttsParagraphs = [];
+
+  chunks.forEach((chunk, i) => {
+    const p = document.createElement('p');
+    p.textContent = chunk;
+    p.dataset.idx = i;
+    container.appendChild(p);
+    ttsParagraphs.push(p);
+  });
+}
+
+function initReadAloud() {
+  const btnPlay  = document.getElementById('btn-tts-play');
+  const btnPrev  = document.getElementById('btn-tts-prev');
+  const btnNext  = document.getElementById('btn-tts-next');
+  const speedEl  = document.getElementById('tts-speed');
+
+  btnPlay.addEventListener('click', toggleReadAloud);
+  btnPrev.addEventListener('click', () => jumpParagraph(-1));
+  btnNext.addEventListener('click', () => jumpParagraph(1));
+  speedEl.addEventListener('change', function () {
+    ttsRate = parseFloat(this.value);
+    // If currently playing, restart current paragraph at new speed
+    if (ttsPlaying && !ttsPaused) {
+      chrome.tts.stop();
+      speakParagraph(ttsCurrentIdx);
+    }
+  });
+}
+
+function toggleReadAloud() {
+  if (!ttsPlaying) {
+    // Start reading from current or first paragraph
+    const idx = ttsCurrentIdx >= 0 ? ttsCurrentIdx : 0;
+    speakParagraph(idx);
+  } else if (ttsPaused) {
+    chrome.tts.resume();
+    ttsPaused = false;
+    updateTtsPlayBtn();
+  } else {
+    chrome.tts.pause();
+    ttsPaused = true;
+    updateTtsPlayBtn();
+  }
+}
+
+function jumpParagraph(delta) {
+  chrome.tts.stop();
+  const next = Math.max(0, Math.min(ttsParagraphs.length - 1, ttsCurrentIdx + delta));
+  speakParagraph(next);
+}
+
+function speakParagraph(idx) {
+  if (idx < 0 || idx >= ttsParagraphs.length) return;
+
+  // Clear previous highlight
+  ttsParagraphs.forEach(p => p.classList.remove('tts-active'));
+
+  ttsCurrentIdx = idx;
+  ttsParagraphs[idx].classList.add('tts-active');
+  ttsParagraphs[idx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  const text = ttsParagraphs[idx].textContent;
+  const statusEl = document.getElementById('tts-status');
+  statusEl.textContent = `Paragraph ${idx + 1} of ${ttsParagraphs.length}`;
+
+  chrome.tts.speak(text, {
+    rate: ttsRate,
+    lang: 'en-US',
+    desiredEventTypes: ['end', 'error'],
+    onEvent: (event) => {
+      if (event.type === 'end') {
+        // Auto-advance to next paragraph
+        if (ttsCurrentIdx < ttsParagraphs.length - 1) {
+          speakParagraph(ttsCurrentIdx + 1);
+        } else {
+          // Finished all paragraphs
+          stopReadAloud();
+          statusEl.textContent = 'Finished';
+        }
+      } else if (event.type === 'error') {
+        stopReadAloud();
+        statusEl.textContent = 'Read aloud error';
+      }
+    }
+  });
+
+  ttsPlaying = true;
+  ttsPaused  = false;
+  updateTtsPlayBtn();
+}
+
+function stopReadAloud() {
+  chrome.tts.stop();
+  ttsPlaying = false;
+  ttsPaused  = false;
+  ttsParagraphs.forEach(p => p.classList.remove('tts-active'));
+  updateTtsPlayBtn();
+}
+
+function updateTtsPlayBtn() {
+  const btn = document.getElementById('btn-tts-play');
+  if (!ttsPlaying) {
+    btn.innerHTML = '&#9654;';
+  } else if (ttsPaused) {
+    btn.innerHTML = '&#9654;';
+  } else {
+    btn.innerHTML = '&#9646;&#9646;';
+  }
+}
 
 // ─── Audio Controls ──────────────────────────────────────────────
 

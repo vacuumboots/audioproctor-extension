@@ -1,13 +1,14 @@
 {
   "manifest_version": 3,
   "name": "AudioProctor",
-  "version": "1.0.1",
-  "version_name": "v1.0.1",
-  "description": "Secure audio assessment player for managed Chromebooks",
+  "version": "1.1.0",
+  "version_name": "v1.1.0",
+  "description": "Secure audio and text assessment player for managed Chromebooks",
   "permissions": [
     "storage",
     "windows",
-    "offscreen"
+    "offscreen",
+    "tts"
   ],
   "host_permissions": [
     "https://audioproctor.com/*",
