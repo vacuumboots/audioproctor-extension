@@ -316,6 +316,29 @@
       border-left-color: var(--accent);
       background: rgba(192, 57, 43, 0.06);
     }
+
+    /* ── Display settings ── */
+    .display-settings {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-bottom: 0.75rem;
+      flex-shrink: 0;
+    }
+
+    .display-settings .ctrl-btn {
+      padding: 0.3rem 0.6rem;
+      font-size: 0.72rem;
+    }
+
+    .display-settings .ctrl-btn.active {
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    .text-reader-card.fullwidth {
+      max-width: 100%;
+    }
   </style>
 </head>
 <body>
@@ -384,6 +407,13 @@
             <option value="1.5">1.5×</option>
           </select>
           <span class="read-aloud-status" id="tts-status"></span>
+        </div>
+
+        <!-- Display settings -->
+        <div class="display-settings">
+          <button class="ctrl-btn" id="btn-font-down" title="Decrease font size">A&minus;</button>
+          <button class="ctrl-btn" id="btn-font-up" title="Increase font size">A+</button>
+          <button class="ctrl-btn" id="btn-fullwidth" title="Toggle full width">Full Width</button>
         </div>
 
         <div class="text-reader-help">

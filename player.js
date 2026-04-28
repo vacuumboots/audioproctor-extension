@@ -202,11 +202,31 @@ function initReadAloud() {
   btnNext.addEventListener('click', () => jumpParagraph(1));
   speedEl.addEventListener('change', function () {
     ttsRate = parseFloat(this.value);
-    // If currently playing, restart current paragraph at new speed
     if (ttsPlaying && !ttsPaused) {
       chrome.tts.stop();
       speakParagraph(ttsCurrentIdx);
     }
+  });
+
+  // ── Display settings ───────────────────────────────────────────
+  const container = document.getElementById('text-paragraphs');
+  const card      = document.getElementById('state-text');
+  let fontSize    = 1.15;  // rem, matches CSS default
+
+  document.getElementById('btn-font-down').addEventListener('click', () => {
+    fontSize = Math.max(0.7, +(fontSize - 0.1).toFixed(2));
+    container.style.fontSize = fontSize + 'rem';
+  });
+
+  document.getElementById('btn-font-up').addEventListener('click', () => {
+    fontSize = Math.min(2.5, +(fontSize + 0.1).toFixed(2));
+    container.style.fontSize = fontSize + 'rem';
+  });
+
+  const btnFullwidth = document.getElementById('btn-fullwidth');
+  btnFullwidth.addEventListener('click', () => {
+    card.classList.toggle('fullwidth');
+    btnFullwidth.classList.toggle('active');
   });
 }
 
