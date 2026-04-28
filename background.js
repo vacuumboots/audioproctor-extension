@@ -78,19 +78,24 @@ chrome.windows.onRemoved.addListener(windowId => {
     }
 
     chrome.storage.session.get('sessionData', async ({ sessionData }) => {
-      if (sessionData && sessionData.signedUrl) {
-        await ensureOffscreen(); // must exist before player.js sends 'load'
-        chrome.windows.create(
-          { url: chrome.runtime.getURL('player.html'), type: 'popup', state: 'fullscreen' },
-          (win) => {
-            playerWindowId = win.id;
-            chrome.storage.session.set({ playerWindowId: win.id });
-          }
-        );
-      } else {
+      if (!sessionData) {
         chrome.storage.session.remove('playerWindowId');
         chrome.offscreen.closeDocument().catch(() => {});
+        return;
       }
+
+      // Audio sessions need the offscreen document; text sessions don't
+      if (sessionData.assessmentType === 'audio') {
+        await ensureOffscreen();
+      }
+
+      chrome.windows.create(
+        { url: chrome.runtime.getURL('player.html'), type: 'popup', state: 'fullscreen' },
+        (win) => {
+          playerWindowId = win.id;
+          chrome.storage.session.set({ playerWindowId: win.id });
+        }
+      );
     });
   }
 });

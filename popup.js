@@ -55,17 +55,25 @@ btnBegin.addEventListener('click', async () => {
   // as this popup — change API_BASE here once to test locally.
   await chrome.storage.session.set({
     sessionData: {
-      signedUrl:    session.signedUrl,
-      filename:     session.filename,
-      exitWordHash: session.exitWordHash,
-      code:         code,
-      apiBase:      API_BASE,
+      assessmentType: session.assessmentType,
+      title:          session.title,
+      exitWordHash:   session.exitWordHash,
+      code:           code,
+      apiBase:        API_BASE,
+      // Audio-only fields (undefined for text sessions)
+      signedUrl:      session.signedUrl,
+      filename:       session.filename,
+      // Text-only fields (undefined for audio sessions)
+      textContent:    session.textContent,
+      textCharCount:  session.textCharCount,
     },
   });
 
-  // Ensure the offscreen audio document is ready before opening the player window,
-  // so player.js's first 'load' message is guaranteed to be received.
-  await chrome.runtime.sendMessage({ type: 'prepare_session' });
+  // Only prepare offscreen audio document for audio sessions.
+  // Text sessions don't need audio playback infrastructure.
+  if (session.assessmentType === 'audio') {
+    await chrome.runtime.sendMessage({ type: 'prepare_session' });
+  }
 
   // Open the player in a chromeless popup window (no tab strip, no address bar)
   const win = await chrome.windows.create({

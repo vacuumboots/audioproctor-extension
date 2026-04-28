@@ -226,6 +226,54 @@
     .state-label.error { color: var(--accent); }
 
     .hidden { display: none !important; }
+
+    /* ── Text reader ── */
+    .text-reader-card {
+      border: 1px solid var(--ink);
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 720px;
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 12rem);
+    }
+
+    .text-reader-header {
+      margin-bottom: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .text-reader-help {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 1rem;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--warm-mid);
+      flex-shrink: 0;
+    }
+
+    .text-reader-help p { margin-bottom: 0.3rem; }
+    .text-reader-help p:last-child { margin-bottom: 0; }
+    .text-reader-help strong { color: var(--ink); font-weight: 600; }
+
+    #text-content {
+      flex: 1;
+      overflow-y: auto;
+      font-size: 1.15rem;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      padding: 1.5rem;
+      border: 1px solid var(--warm-mid);
+      background: white;
+      user-select: text;
+      cursor: text;
+    }
+
+    #text-content:focus {
+      outline: 2px solid var(--ink);
+      outline-offset: 1px;
+    }
   </style>
 </head>
 <body>
@@ -274,6 +322,20 @@
           </div>
         </div>
 
+      </div>
+
+      <!-- Text reader -->
+      <div id="state-text" class="text-reader-card hidden">
+        <div class="text-reader-header">
+          <p class="state-label">Text Assessment</p>
+        </div>
+
+        <div class="text-reader-help">
+          <p><strong>Select-to-Speak:</strong> If enabled, highlight text and press the search key + S to hear it read aloud.</p>
+          <p><strong>ChromeVox:</strong> If enabled, navigate with ChromeVox keyboard controls.</p>
+        </div>
+
+        <div id="text-content" tabindex="0"></div>
       </div>
     </div>
 

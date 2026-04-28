@@ -57,7 +57,7 @@ function sendOffscreen(msg) {
 // ─── Load Session ────────────────────────────────────────────────
 
 chrome.storage.session.get('sessionData', ({ sessionData }) => {
-  if (!sessionData || !sessionData.signedUrl) {
+  if (!sessionData || (!sessionData.signedUrl && !sessionData.textContent)) {
     showError('Session expired or not found. Please re-enter your code using the extension icon.');
     logEvent('session_expired');
     return;
@@ -69,18 +69,30 @@ chrome.storage.session.get('sessionData', ({ sessionData }) => {
     API_BASE = sessionData.apiBase;
   }
 
-  document.getElementById('top-filename').textContent = sessionData.filename;
-  document.title = 'AudioProctor — ' + sessionData.filename;
+  const displayTitle = sessionData.title || sessionData.filename || 'Assessment';
+  document.getElementById('top-filename').textContent = displayTitle;
+  document.title = 'AudioProctor — ' + displayTitle;
 
-  // Load audio in the offscreen document — validate URL is from Supabase
-  signedUrl = sessionData.signedUrl;
-  if (!ALLOWED_URL_PATTERN.test(signedUrl)) {
-    showError('Invalid audio source. Please re-enter your code.');
-    logEvent('audio_error', { message: 'invalid signed URL origin' });
-    return;
+  // ─── Branch: audio vs text ──────────────────────────────────────
+
+  if (sessionData.assessmentType === 'text' && sessionData.textContent) {
+    // Text assessment — render text reader, skip audio infrastructure
+    const textEl = document.getElementById('text-content');
+    textEl.textContent = sessionData.textContent;  // safe: textContent, not innerHTML
+    document.getElementById('state-loading').classList.add('hidden');
+    document.getElementById('state-text').classList.remove('hidden');
+    logEvent('text_viewed');
+  } else {
+    // Audio assessment — existing flow
+    signedUrl = sessionData.signedUrl;
+    if (!signedUrl || !ALLOWED_URL_PATTERN.test(signedUrl)) {
+      showError('Invalid audio source. Please re-enter your code.');
+      logEvent('audio_error', { message: 'invalid signed URL origin' });
+      return;
+    }
+    sendOffscreen({ action: 'load', url: signedUrl });
+    startLoadTimeout();
   }
-  sendOffscreen({ action: 'load', url: signedUrl });
-  startLoadTimeout();
 
   // Listen for events from the offscreen document
   chrome.runtime.onMessage.addListener((msg) => {
