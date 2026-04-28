@@ -46,6 +46,29 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape')     { e.preventDefault(); enforceFullscreen(); return; }
   if (/^F\d+$/.test(e.key))  { e.preventDefault(); return; }
   if (e.ctrlKey || e.altKey || e.metaKey) { e.preventDefault(); return; }
+
+  // ── Text reader keyboard controls ──────────────────────────────
+  const textState = document.getElementById('state-text');
+  if (textState && !textState.classList.contains('hidden')) {
+    // Don't intercept if user is typing in the exit input
+    if (document.activeElement && document.activeElement.id === 'exit-input') return;
+
+    if (e.key === ' ' || e.key === 'Spacebar') {
+      e.preventDefault();
+      toggleReadAloud();
+      return;
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      jumpParagraph(-1);
+      return;
+    }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      jumpParagraph(1);
+      return;
+    }
+  }
 });
 
 // ─── Audio Commands ──────────────────────────────────────────────
