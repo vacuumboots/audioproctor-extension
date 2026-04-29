@@ -193,6 +193,7 @@ let ttsCurrentIdx  = -1;
 let ttsPlaying     = false;
 let ttsPaused      = false;
 let ttsRate        = 1.0;
+let ttsVoice       = '';
 
 function renderTextParagraphs(rawText) {
   const container = document.getElementById('text-paragraphs');
@@ -225,6 +226,26 @@ function initReadAloud() {
   btnNext.addEventListener('click', () => jumpParagraph(1));
   speedEl.addEventListener('change', function () {
     ttsRate = parseFloat(this.value);
+    if (ttsPlaying && !ttsPaused) {
+      chrome.tts.stop();
+      speakParagraph(ttsCurrentIdx);
+    }
+  });
+
+  // ── Voice selector ──────────────────────────────────────────────
+  const voiceEl = document.getElementById('tts-voice');
+  chrome.tts.getVoices(function (voices) {
+    voices.forEach(function (v) {
+      const opt = document.createElement('option');
+      opt.value = v.voiceName;
+      opt.textContent = v.voiceName + (v.lang ? ' (' + v.lang + ')' : '');
+      voiceEl.appendChild(opt);
+    });
+    // Default to empty (system default)
+    voiceEl.value = '';
+  });
+  voiceEl.addEventListener('change', function () {
+    ttsVoice = this.value;
     if (ttsPlaying && !ttsPaused) {
       chrome.tts.stop();
       speakParagraph(ttsCurrentIdx);
@@ -292,6 +313,7 @@ function speakParagraph(idx) {
   chrome.tts.speak(text, {
     rate: ttsRate,
     lang: 'en-US',
+    voiceName: ttsVoice || undefined,
     desiredEventTypes: ['end', 'error'],
     onEvent: (event) => {
       if (event.type === 'end') {

@@ -297,6 +297,9 @@
     .read-aloud-controls select {
       font-size: 0.75rem;
       padding: 0.3rem 0.4rem;
+      max-width: 140px;
+      text-overflow: ellipsis;
+      overflow: hidden;
     }
 
     .read-aloud-status {
@@ -405,6 +408,9 @@
             <option value="1" selected>1×</option>
             <option value="1.25">1.25×</option>
             <option value="1.5">1.5×</option>
+          </select>
+          <select id="tts-voice" title="Voice">
+            <option value="">Default voice</option>
           </select>
           <span class="read-aloud-status" id="tts-status"></span>
         </div>
