@@ -100,7 +100,7 @@ chrome.storage.session.get('sessionData', ({ sessionData }) => {
 
   if (sessionData.assessmentType === 'text' && sessionData.textContent) {
     // Text assessment — render paragraphs, wire read-aloud, skip audio infrastructure
-    renderTextParagraphs(sessionData.textContent);
+    renderTextContent(sessionData.textContent);
     initReadAloud();
     document.getElementById('state-loading').classList.add('hidden');
     document.getElementById('state-text').classList.remove('hidden');
@@ -195,24 +195,17 @@ let ttsPaused      = false;
 let ttsRate        = 1.0;
 let ttsVoice       = '';
 
-function renderTextParagraphs(rawText) {
+function renderTextContent(rawHTML) {
   const container = document.getElementById('text-paragraphs');
-  // Split on double newlines, collapse whitespace, filter empty
-  const chunks = rawText
-    .split(/\n{2,}/)
-    .map(s => s.trim())
-    .filter(s => s.length > 0);
 
-  container.innerHTML = '';
-  ttsParagraphs = [];
+  // Sanitize the resolved HTML (images have signed URLs already)
+  const cleanHTML = sanitizeHTML(rawHTML);
 
-  chunks.forEach((chunk, i) => {
-    const p = document.createElement('p');
-    p.textContent = chunk;
-    p.dataset.idx = i;
-    container.appendChild(p);
-    ttsParagraphs.push(p);
-  });
+  // Set innerHTML — images render inline, paragraphs wrap text
+  container.innerHTML = cleanHTML;
+
+  // Collect paragraph elements for TTS navigation
+  ttsParagraphs = [...container.querySelectorAll('p')];
 }
 
 function initReadAloud() {
@@ -308,6 +301,18 @@ function speakParagraph(idx) {
 
   const text = ttsParagraphs[idx].textContent;
   const statusEl = document.getElementById('tts-status');
+
+  // Skip image-only paragraphs (no text to speak)
+  if (!text.trim()) {
+    if (idx < ttsParagraphs.length - 1) {
+      speakParagraph(idx + 1);
+    } else {
+      stopReadAloud();
+      statusEl.textContent = 'Finished';
+    }
+    return;
+  }
+
   statusEl.textContent = `Paragraph ${idx + 1} of ${ttsParagraphs.length}`;
 
   chrome.tts.speak(text, {

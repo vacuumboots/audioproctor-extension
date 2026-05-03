@@ -66,6 +66,7 @@ btnBegin.addEventListener('click', async () => {
       // Text-only fields (undefined for audio sessions)
       textContent:    session.textContent,
       textCharCount:  session.textCharCount,
+      imageCount:     session.imageCount,
     },
   });
 
