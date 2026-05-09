@@ -199,7 +199,13 @@ function renderTextContent(rawHTML) {
   const container = document.getElementById('text-paragraphs');
 
   // Sanitize the resolved HTML (images have signed URLs already)
-  const cleanHTML = sanitizeHTML(rawHTML);
+  let cleanHTML;
+  try {
+    cleanHTML = sanitizeHTML(rawHTML);
+  } catch (e) {
+    console.error('sanitizeHTML failed:', e);
+    cleanHTML = rawHTML;
+  }
 
   // Set innerHTML — images render inline, paragraphs wrap text
   container.innerHTML = cleanHTML;
