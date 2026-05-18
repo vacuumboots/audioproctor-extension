@@ -90,6 +90,7 @@
       font-size: 0.75rem;
       color: var(--muted);
       margin-top: 0.5rem;
+      display: block;
     }
 
     /* ── Language Toggle ── */
@@ -135,21 +136,20 @@
 <body>
   <span class="wordmark">Audio<span class="accent">Proctor</span></span>
 
-  <span class="label" data-i18n="popup.assessmentCode">Assessment Code</span>
+  <span class="label" id="lbl-code"></span>
   <input
     type="text"
     id="code-input"
-    placeholder="ABC-123 or AB12"
     maxlength="20"
     autocomplete="off"
     spellcheck="false"
   >
 
-  <button id="btn-begin" data-i18n="popup.beginAssessment">Begin Assessment</button>
+  <button id="btn-begin"></button>
 
   <div id="error-msg" class="error-msg"></div>
 
-  <span class="hint" data-i18n="popup.hint">Enter the code your teacher gave you.</span>
+  <span class="hint" id="hint"></span>
 
   <div class="popup-footer">
     <span class="lang-toggle" id="lang-toggle"></span>
