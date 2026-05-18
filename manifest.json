@@ -4,6 +4,7 @@
   "version": "1.4.0",
   "version_name": "v1.4.0",
   "description": "Secure audio and text assessment player for managed Chromebooks",
+  "default_locale": "en",
   "permissions": [
     "storage",
     "windows",
