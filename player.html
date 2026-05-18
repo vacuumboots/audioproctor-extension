@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>AudioProctor — Assessment</title>
+  <title>AudioProctor</title>
   <style>
     :root {
       --ink:    #1a1a2e;
@@ -358,13 +358,13 @@
 
       <!-- Loading -->
       <div id="state-loading">
-        <p class="state-label">Loading assessment&hellip;</p>
+        <p class="state-label" data-i18n="player.loading"></p>
       </div>
 
       <!-- Error -->
       <div id="state-error" class="hidden">
-        <p class="state-label error" id="error-msg">Something went wrong.</p>
-        <button class="ctrl-btn" id="btn-retry" style="margin: 1.5rem auto 0; display: block;">Try Again</button>
+        <p class="state-label error" id="error-msg" data-i18n="player.somethingWrong"></p>
+        <button class="ctrl-btn" id="btn-retry" style="margin: 1.5rem auto 0; display: block;" data-i18n="player.tryAgain"></button>
       </div>
 
       <!-- Player -->
@@ -379,9 +379,9 @@
             </span>
           </div>
           <div class="controls-row">
-            <button class="play-btn" id="btn-play" title="Play / Pause">&#9654;</button>
-            <button class="ctrl-btn" id="btn-rewind">&#8592; 10s</button>
-            <select id="speed-select" title="Playback speed">
+            <button class="play-btn" id="btn-play" data-i18n-title="player.playPauseTitle">&#9654;</button>
+            <button class="ctrl-btn" id="btn-rewind" data-i18n="player.rewind" data-i18n-title="player.rewindTitle"></button>
+            <select id="speed-select" data-i18n-title="player.speedLabel">
               <option value="0.75">0.75×</option>
               <option value="1" selected>1×</option>
               <option value="1.25">1.25×</option>
@@ -395,35 +395,35 @@
       <!-- Text reader -->
       <div id="state-text" class="text-reader-card hidden">
         <div class="text-reader-header">
-          <p class="state-label">Text Assessment</p>
+          <p class="state-label" data-i18n="player.textAssessment"></p>
         </div>
 
         <!-- Read Aloud controls -->
         <div class="read-aloud-controls">
-          <button class="play-btn" id="btn-tts-play" title="Read Aloud / Pause">&#9654;</button>
-          <button class="ctrl-btn" id="btn-tts-prev" title="Previous paragraph">&#8593;</button>
-          <button class="ctrl-btn" id="btn-tts-next" title="Next paragraph">&#8595;</button>
-          <select id="tts-speed" title="Read aloud speed">
+          <button class="play-btn" id="btn-tts-play" data-i18n-title="player.tts.readAloud">&#9654;</button>
+          <button class="ctrl-btn" id="btn-tts-prev" data-i18n-title="player.tts.previousLabel">&#8593;</button>
+          <button class="ctrl-btn" id="btn-tts-next" data-i18n-title="player.tts.nextLabel">&#8595;</button>
+          <select id="tts-speed" data-i18n-title="player.tts.speedLabel">
             <option value="0.75">0.75×</option>
             <option value="1" selected>1×</option>
             <option value="1.25">1.25×</option>
             <option value="1.5">1.5×</option>
           </select>
-          <select id="tts-voice" title="Voice">
-            <option value="">Default voice</option>
+          <select id="tts-voice" data-i18n-title="player.tts.voice">
+            <option value="" data-i18n="player.tts.defaultVoice"></option>
           </select>
           <span class="read-aloud-status" id="tts-status"></span>
         </div>
 
         <!-- Display settings -->
         <div class="display-settings">
-          <button class="ctrl-btn" id="btn-font-down" title="Decrease font size">A&minus;</button>
-          <button class="ctrl-btn" id="btn-font-up" title="Increase font size">A+</button>
-          <button class="ctrl-btn" id="btn-fullwidth" title="Toggle full width">Full Width</button>
+          <button class="ctrl-btn" id="btn-font-down" data-i18n-title="player.tts.fontSizeDown">A&minus;</button>
+          <button class="ctrl-btn" id="btn-font-up" data-i18n-title="player.tts.fontSizeUp">A+</button>
+          <button class="ctrl-btn" id="btn-fullwidth" data-i18n="player.tts.fullWidth" data-i18n-title="player.tts.toggleFullWidth"></button>
         </div>
 
         <div class="text-reader-help">
-          <p><strong>Read Aloud:</strong> Use the controls above, or press <strong>Space</strong> to play/pause and <strong>&uarr; &darr;</strong> arrows to navigate paragraphs.</p>
+          <p id="tts-instructions"><strong data-i18n="player.tts.readAloud"></strong>: <span data-i18n="player.tts.instructions"></span></p>
         </div>
 
         <div id="text-paragraphs" tabindex="0"></div>
@@ -432,24 +432,50 @@
 
     <!-- Exit section — always visible regardless of loading/error/player state -->
     <div class="exit-section" style="padding: 1.5rem 2rem; max-width: 560px; margin: 0 auto; width: 100%;">
-      <span class="exit-label">Exit Assessment</span>
-      <p class="exit-hint">Ask your teacher for the exit word, then type it below.</p>
+      <span class="exit-label" data-i18n="player.exitWordPrompt"></span>
+      <p class="exit-hint" id="exit-hint" data-i18n="player.exitHint"></p>
       <div class="exit-row">
         <input
           type="text"
           id="exit-input"
           class="exit-input"
-          placeholder="Exit word"
+          data-i18n-placeholder="player.exitWordPlaceholder"
           autocomplete="off"
           spellcheck="false"
         >
-        <button class="exit-btn" id="btn-exit">Exit</button>
+        <button class="exit-btn" id="btn-exit" data-i18n="player.submit"></button>
       </div>
       <p id="exit-error" class="exit-error"></p>
     </div>
   </div>
 
   <script src="lib/sanitize.js"></script>
+  <script src="lib/i18n.js"></script>
+  <script>
+    // Apply translations to DOM elements with data-i18n attributes
+    (async () => {
+      try {
+        await window.i18nReady;
+      } catch (e) {
+        console.warn('[player.html] i18n init failed, using defaults', e);
+      }
+      // data-i18n → textContent
+      document.querySelectorAll('[data-i18n]').forEach(function (el) {
+        var key = el.getAttribute('data-i18n');
+        el.textContent = window.t ? window.t(key) : key;
+      });
+      // data-i18n-title → title attribute
+      document.querySelectorAll('[data-i18n-title]').forEach(function (el) {
+        var key = el.getAttribute('data-i18n-title');
+        el.title = window.t ? window.t(key) : key;
+      });
+      // data-i18n-placeholder → placeholder attribute
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+        var key = el.getAttribute('data-i18n-placeholder');
+        el.placeholder = window.t ? window.t(key) : key;
+      });
+    })();
+  </script>
   <script src="player.js"></script>
 </body>
 </html>

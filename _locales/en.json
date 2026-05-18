@@ -23,16 +23,25 @@
     "title": "Assessment",
     "readyPrompt": "Ready to begin?",
     "begin": "Begin",
+    "loading": "Loading assessment\u2026",
+    "tryAgain": "Try Again",
+    "somethingWrong": "Something went wrong.",
     "exitWordPrompt": "Exit Assessment",
     "exitWordPlaceholder": "Exit word",
     "submit": "Exit",
     "exitWordIncorrect": "Incorrect exit word. Ask your teacher.",
+    "exitHint": "Ask your teacher for the exit word, then type it below.",
     "assessmentComplete": "Assessment complete!",
     "noAudio": "No audio available",
     "play": "Play",
     "pause": "Pause",
+    "playPauseTitle": "Play / Pause",
+    "rewind": "\u2190 10s",
+    "rewindTitle": "Rewind 10 seconds",
+    "speedLabel": "Playback speed",
     "timeCurrent": "{current}",
     "timeTotal": "{total}",
+    "textAssessment": "Text Assessment",
     "tts": {
       "readAloud": "Read Aloud",
       "play": "Play",
@@ -45,13 +54,27 @@
       "fullWidth": "Full Width",
       "instructions": "Use the controls above, or press Space to play/pause and \u2191 \u2193 arrows to navigate paragraphs.",
       "noParagraphs": "No paragraphs found in this assessment.",
-      "endOfText": "End of assessment"
+      "endOfText": "End of assessment",
+      "finished": "Finished",
+      "readAloudError": "Read aloud error",
+      "paragraphStatus": "Paragraph {current} of {total}",
+      "previousLabel": "Previous paragraph",
+      "nextLabel": "Next paragraph",
+      "speedLabel": "Read aloud speed",
+      "defaultVoice": "Default voice",
+      "fontSizeDown": "Decrease font size",
+      "fontSizeUp": "Increase font size",
+      "toggleFullWidth": "Toggle full width"
     },
     "errors": {
       "noSession": "Session expired or not found. Please re-enter your code using the extension icon.",
       "fetchFailed": "Could not load assessment. Check your connection.",
-      "audioError": "Audio could not be played. Ask your teacher to restart.",
-      "textError": "Text could not be displayed. Ask your teacher for help."
+      "invalidSource": "Invalid audio source. Please re-enter your code.",
+      "audioError": "Audio could not be played: {message}. Ask your teacher to restart.",
+      "playbackBlocked": "Playback blocked: {message}. Try clicking Play again.",
+      "loadTimeout": "Audio is taking too long to load. Please try again.",
+      "textError": "Text could not be displayed. Ask your teacher for help.",
+      "emptyExitWord": "Please type the exit word."
     }
   }
 }
