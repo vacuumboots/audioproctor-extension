@@ -1,0 +1,57 @@
+{
+  "_meta": {
+    "language": "Français",
+    "locale": "fr-CA",
+    "direction": "ltr"
+  },
+  "popup": {
+    "title": "AudioProctor",
+    "assessmentCode": "Code d'évaluation",
+    "codePlaceholder": "ABC-123 ou AB12",
+    "beginAssessment": "Commencer l'évaluation",
+    "loading": "Chargement…",
+    "hint": "Entrez le code fourni par votre enseignant.",
+    "errors": {
+      "emptyCode": "Entrez un code d'évaluation.",
+      "invalidCode": "Entrez un code valide (p. ex. ABC-123 ou AB12).",
+      "networkError": "Impossible de joindre le serveur. Vérifiez votre connexion.",
+      "sessionError": "Évaluation introuvable ou expirée. Consultez votre enseignant.",
+      "unknownError": "Erreur du serveur. Réessayez."
+    }
+  },
+  "player": {
+    "title": "Évaluation",
+    "readyPrompt": "Prêt à commencer?",
+    "begin": "Commencer",
+    "exitWordPrompt": "Quitter l'évaluation",
+    "exitWordPlaceholder": "Mot de sortie",
+    "submit": "Quitter",
+    "exitWordIncorrect": "Mot de sortie incorrect. Demandez à votre enseignant.",
+    "assessmentComplete": "Évaluation terminée!",
+    "noAudio": "Aucun audio disponible",
+    "play": "Lecture",
+    "pause": "Pause",
+    "timeCurrent": "{current}",
+    "timeTotal": "{total}",
+    "tts": {
+      "readAloud": "Lecture à voix haute",
+      "play": "Lecture",
+      "pause": "Pause",
+      "previous": "Précédent",
+      "next": "Suivant",
+      "speed": "Vitesse",
+      "voice": "Voix",
+      "fontSize": "Taille du texte",
+      "fullWidth": "Pleine largeur",
+      "instructions": "Utilisez les contrôles ci-dessus, ou appuyez sur Espace pour lire/mettre en pause et les flèches ↑ ↓ pour naviguer entre les paragraphes.",
+      "noParagraphs": "Aucun paragraphe trouvé dans cette évaluation.",
+      "endOfText": "Fin de l'évaluation"
+    },
+    "errors": {
+      "noSession": "Session expirée ou introuvable. Veuillez ressaisir votre code à l'aide de l'icône de l'extension.",
+      "fetchFailed": "Impossible de charger l'évaluation. Vérifiez votre connexion.",
+      "audioError": "Impossible de lire l'audio. Demandez à votre enseignant de recommencer.",
+      "textError": "Impossible d'afficher le texte. Demandez à votre enseignant."
+    }
+  }
+}
