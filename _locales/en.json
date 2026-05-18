@@ -1,0 +1,57 @@
+{
+  "_meta": {
+    "language": "English",
+    "locale": "en",
+    "direction": "ltr"
+  },
+  "popup": {
+    "title": "AudioProctor",
+    "assessmentCode": "Assessment Code",
+    "codePlaceholder": "ABC-123 or AB12",
+    "beginAssessment": "Begin Assessment",
+    "loading": "Loading\u2026",
+    "hint": "Enter the code your teacher gave you.",
+    "errors": {
+      "emptyCode": "Enter an assessment code.",
+      "invalidCode": "Enter a valid code (e.g. ABC-123 or AB12).",
+      "networkError": "Could not reach the server. Check your connection.",
+      "sessionError": "Assessment not found or has expired. Check with your teacher.",
+      "unknownError": "Server error. Try again."
+    }
+  },
+  "player": {
+    "title": "Assessment",
+    "readyPrompt": "Ready to begin?",
+    "begin": "Begin",
+    "exitWordPrompt": "Exit Assessment",
+    "exitWordPlaceholder": "Exit word",
+    "submit": "Exit",
+    "exitWordIncorrect": "Incorrect exit word. Ask your teacher.",
+    "assessmentComplete": "Assessment complete!",
+    "noAudio": "No audio available",
+    "play": "Play",
+    "pause": "Pause",
+    "timeCurrent": "{current}",
+    "timeTotal": "{total}",
+    "tts": {
+      "readAloud": "Read Aloud",
+      "play": "Play",
+      "pause": "Pause",
+      "previous": "Previous",
+      "next": "Next",
+      "speed": "Speed",
+      "voice": "Voice",
+      "fontSize": "Font Size",
+      "fullWidth": "Full Width",
+      "instructions": "Use the controls above, or press Space to play/pause and \u2191 \u2193 arrows to navigate paragraphs.",
+      "noParagraphs": "No paragraphs found in this assessment.",
+      "endOfText": "End of assessment"
+    },
+    "errors": {
+      "noSession": "Session expired or not found. Please re-enter your code using the extension icon.",
+      "fetchFailed": "Could not load assessment. Check your connection.",
+      "audioError": "Audio could not be played. Ask your teacher to restart.",
+      "textError": "Text could not be displayed. Ask your teacher for help."
+    }
+  }
+}
