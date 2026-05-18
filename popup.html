@@ -20,7 +20,7 @@
       font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
       font-weight: 300;
       width: 300px;
-      padding: 1.5rem;
+      padding: 1.5rem 1.5rem 0.75rem;
     }
 
     .wordmark {
@@ -90,14 +90,52 @@
       font-size: 0.75rem;
       color: var(--muted);
       margin-top: 0.5rem;
-      display: block;
+    }
+
+    /* ── Language Toggle ── */
+    .popup-footer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid #e0dbd0;
+    }
+    .lang-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 0;
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+    }
+    .lang-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 0.2rem 0.3rem;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      font-size: inherit;
+      font-weight: inherit;
+      letter-spacing: inherit;
+    }
+    .lang-btn.active {
+      color: var(--ink);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .lang-btn:hover { color: var(--ink); }
+    .lang-sep {
+      color: var(--muted);
+      user-select: none;
     }
   </style>
 </head>
 <body>
   <span class="wordmark">Audio<span class="accent">Proctor</span></span>
 
-  <span class="label">Assessment Code</span>
+  <span class="label" data-i18n="popup.assessmentCode">Assessment Code</span>
   <input
     type="text"
     id="code-input"
@@ -107,12 +145,17 @@
     spellcheck="false"
   >
 
-  <button id="btn-begin">Begin Assessment</button>
+  <button id="btn-begin" data-i18n="popup.beginAssessment">Begin Assessment</button>
 
   <div id="error-msg" class="error-msg"></div>
 
-  <span class="hint">Enter the code your teacher gave you.</span>
+  <span class="hint" data-i18n="popup.hint">Enter the code your teacher gave you.</span>
 
+  <div class="popup-footer">
+    <span class="lang-toggle" id="lang-toggle"></span>
+  </div>
+
+  <script src="lib/i18n.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>
