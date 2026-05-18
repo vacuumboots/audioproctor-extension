@@ -81,7 +81,7 @@ function sendOffscreen(msg) {
 
 chrome.storage.session.get('sessionData', ({ sessionData }) => {
   if (!sessionData || (!sessionData.signedUrl && !sessionData.textContent)) {
-    showError('Session expired or not found. Please re-enter your code using the extension icon.');
+    showError(t('player.errors.noSession'));
     logEvent('session_expired');
     return;
   }
@@ -92,7 +92,7 @@ chrome.storage.session.get('sessionData', ({ sessionData }) => {
     API_BASE = sessionData.apiBase;
   }
 
-  const displayTitle = sessionData.title || sessionData.filename || 'Assessment';
+  const displayTitle = sessionData.title || sessionData.filename || t('player.title');
   document.getElementById('top-filename').textContent = displayTitle;
   document.title = 'AudioProctor — ' + displayTitle;
 
@@ -109,7 +109,7 @@ chrome.storage.session.get('sessionData', ({ sessionData }) => {
     // Audio assessment — existing flow
     signedUrl = sessionData.signedUrl;
     if (!signedUrl || !ALLOWED_URL_PATTERN.test(signedUrl)) {
-      showError('Invalid audio source. Please re-enter your code.');
+      showError(t('player.errors.invalidSource'));
       logEvent('audio_error', { message: 'invalid signed URL origin' });
       return;
     }
@@ -154,12 +154,12 @@ chrome.storage.session.get('sessionData', ({ sessionData }) => {
       case 'play_error':
         audioPaused = true;
         document.getElementById('btn-play').innerHTML = '&#9654;';
-        showError('Playback blocked: ' + msg.message + '. Try clicking Play again.');
+        showError(t('player.errors.playbackBlocked', { message: msg.message }));
         break;
       case 'error':
         audioPaused = true;
         document.getElementById('btn-play').innerHTML = '&#9654;';
-        showError('Audio failed: ' + msg.message + '. Ask your teacher to restart.');
+        showError(t('player.errors.audioError', { message: msg.message }));
         logEvent('audio_error', { message: msg.message });
         break;
     }
@@ -314,12 +314,12 @@ function speakParagraph(idx) {
       speakParagraph(idx + 1);
     } else {
       stopReadAloud();
-      statusEl.textContent = 'Finished';
+      statusEl.textContent = t('player.tts.finished');
     }
     return;
   }
 
-  statusEl.textContent = `Paragraph ${idx + 1} of ${ttsParagraphs.length}`;
+  statusEl.textContent = t('player.tts.paragraphStatus', { current: idx + 1, total: ttsParagraphs.length });
 
   chrome.tts.speak(text, {
     rate: ttsRate,
@@ -334,11 +334,11 @@ function speakParagraph(idx) {
         } else {
           // Finished all paragraphs
           stopReadAloud();
-          statusEl.textContent = 'Finished';
+          statusEl.textContent = t('player.tts.finished');
         }
       } else if (event.type === 'error') {
         stopReadAloud();
-        statusEl.textContent = 'Read aloud error';
+        statusEl.textContent = t('player.tts.readAloudError');
       }
     }
   });
@@ -392,7 +392,7 @@ function startLoadTimeout() {
   clearTimeout(loadTimeout);
   loadTimeout = setTimeout(() => {
     if (document.getElementById('state-loading').classList.contains('hidden')) return;
-    showError('Audio is taking too long to load. Please try again.');
+    showError(t('player.errors.loadTimeout'));
   }, 120000);
 }
 
@@ -410,7 +410,7 @@ async function attemptExit(inputId, errorId) {
   const word  = input.value.toLowerCase().trim();
 
   if (!word) {
-    showExitError(errorId, 'Please type the exit word.');
+    showExitError(errorId, t('player.errors.emptyExitWord'));
     return;
   }
 
@@ -424,7 +424,7 @@ async function attemptExit(inputId, errorId) {
       chrome.windows.getCurrent(w => chrome.windows.remove(w.id));
     });
   } else {
-    showExitError(errorId, 'Incorrect exit word. Ask your teacher.');
+    showExitError(errorId, t('player.exitWordIncorrect'));
     input.value = '';
     input.focus();
   }
@@ -468,6 +468,58 @@ function showExitError(errorId, msg) {
   el.textContent   = msg;
   el.style.display = 'block';
 }
+
+// ─── i18n ────────────────────────────────────────────────────────
+
+/**
+ * Apply translations to all elements annotated with data-i18n and
+ * data-i18n-attr attributes. Called once on init and again whenever
+ * the locale changes.
+ */
+function applyI18n() {
+  // data-i18n: set innerHTML (preserves HTML in translation values)
+  document.querySelectorAll('[data-i18n]').forEach(function (el) {
+    var key = el.getAttribute('data-i18n');
+    if (!key) return;
+    if (el.tagName === 'TITLE') {
+      document.title = 'AudioProctor \u2014 ' + t(key);
+    } else {
+      el.innerHTML = t(key);
+    }
+  });
+
+  // data-i18n-title: set title attribute
+  document.querySelectorAll('[data-i18n-title]').forEach(function (el) {
+    var key = el.getAttribute('data-i18n-title');
+    if (key) el.title = t(key);
+  });
+
+  // data-i18n-placeholder: set placeholder attribute
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+    var key = el.getAttribute('data-i18n-placeholder');
+    if (key) el.placeholder = t(key);
+  });
+
+  // Legacy data-i18n-attr: set specific attributes in "attr:key,attr2:key2" format
+  document.querySelectorAll('[data-i18n-attr]').forEach(function (el) {
+    var mapping = el.getAttribute('data-i18n-attr');
+    if (!mapping) return;
+    mapping.split(',').forEach(function (pair) {
+      var parts = pair.split(':').map(function (s) { return s.trim(); });
+      var attr = parts[0];
+      var key  = parts[1];
+      if (attr && key) {
+        el.setAttribute(attr, t(key));
+      }
+    });
+  });
+}
+
+// Wait for i18n module to load its locale, then apply translations
+window.i18nReady.then(applyI18n);
+
+// Re-apply translations whenever locale changes
+window.addEventListener('localechanged', applyI18n);
 
 // ─── Util ────────────────────────────────────────────────────────
 

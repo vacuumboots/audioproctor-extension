@@ -23,16 +23,25 @@
     "title": "Évaluation",
     "readyPrompt": "Prêt à commencer?",
     "begin": "Commencer",
+    "loading": "Chargement de l'évaluation\u2026",
+    "tryAgain": "Réessayer",
+    "somethingWrong": "Une erreur s'est produite.",
     "exitWordPrompt": "Quitter l'évaluation",
     "exitWordPlaceholder": "Mot de sortie",
     "submit": "Quitter",
     "exitWordIncorrect": "Mot de sortie incorrect. Demandez à votre enseignant.",
+    "exitHint": "Demandez le mot de sortie à votre enseignant, puis saisissez-le ci-dessous.",
     "assessmentComplete": "Évaluation terminée!",
     "noAudio": "Aucun audio disponible",
     "play": "Lecture",
     "pause": "Pause",
+    "playPauseTitle": "Lecture / Pause",
+    "rewind": "\u2190 10s",
+    "rewindTitle": "Reculer de 10 secondes",
+    "speedLabel": "Vitesse de lecture",
     "timeCurrent": "{current}",
     "timeTotal": "{total}",
+    "textAssessment": "Évaluation textuelle",
     "tts": {
       "readAloud": "Lecture à voix haute",
       "play": "Lecture",
@@ -45,13 +54,27 @@
       "fullWidth": "Pleine largeur",
       "instructions": "Utilisez les contrôles ci-dessus, ou appuyez sur Espace pour lire/mettre en pause et les flèches ↑ ↓ pour naviguer entre les paragraphes.",
       "noParagraphs": "Aucun paragraphe trouvé dans cette évaluation.",
-      "endOfText": "Fin de l'évaluation"
+      "endOfText": "Fin de l'évaluation",
+      "finished": "Terminé",
+      "readAloudError": "Erreur de lecture à voix haute",
+      "paragraphStatus": "Paragraphe {current} sur {total}",
+      "previousLabel": "Paragraphe précédent",
+      "nextLabel": "Paragraphe suivant",
+      "speedLabel": "Vitesse de lecture à voix haute",
+      "defaultVoice": "Voix par défaut",
+      "fontSizeDown": "Réduire la taille du texte",
+      "fontSizeUp": "Augmenter la taille du texte",
+      "toggleFullWidth": "Pleine largeur (activer/désactiver)"
     },
     "errors": {
       "noSession": "Session expirée ou introuvable. Veuillez ressaisir votre code à l'aide de l'icône de l'extension.",
       "fetchFailed": "Impossible de charger l'évaluation. Vérifiez votre connexion.",
-      "audioError": "Impossible de lire l'audio. Demandez à votre enseignant de recommencer.",
-      "textError": "Impossible d'afficher le texte. Demandez à votre enseignant."
+      "invalidSource": "Source audio invalide. Veuillez ressaisir votre code.",
+      "audioError": "Impossible de lire l'audio : {message}. Demandez à votre enseignant de recommencer.",
+      "playbackBlocked": "Lecture bloquée : {message}. Essayez de cliquer sur Lecture à nouveau.",
+      "loadTimeout": "Le chargement audio prend trop de temps. Veuillez réessayer.",
+      "textError": "Impossible d'afficher le texte. Demandez à votre enseignant.",
+      "emptyExitWord": "Veuillez saisir le mot de sortie."
     }
   }
 }
